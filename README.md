@@ -1,2 +1,3 @@
 # megaplan
-Working with CRM Megaplan
+Это пакет для подключения к АПИ [Мегаплан](https://megaplan.ru/)
+###Установка
