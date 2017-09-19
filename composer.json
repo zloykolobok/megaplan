@@ -2,7 +2,6 @@
     "name": "zloykolobok/megaplan",
     "description": "Working with CRM Megaplan",
     "license": "MIT",
-    "version": "1.0.1",
     "require": {
         "php": ">=5.5.9"
     },
