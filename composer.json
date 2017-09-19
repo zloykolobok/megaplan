@@ -1,0 +1,14 @@
+{
+    "name": "zloykolobok/megaplan",
+    "description": "Working with CRM Megaplan",
+    "license": "MIT",
+    "version": "1.0.0",
+    "require": {
+        "php": ">=5.5.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zloykolobok\\Megaplan\\": "src/"
+        }
+    }
+}
