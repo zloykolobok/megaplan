@@ -3,15 +3,15 @@
 
 ## Установка
 С помощью composer <br />
-composer require zloykolobok/megaplan
+`composer require zloykolobok/megaplan` <br />
 
 ## Подключение
 В app.php в секции Package Service Providers <br />
-Zloykolobok\Megaplan\MegaplanServiceProvider::class,
+`Zloykolobok\Megaplan\MegaplanServiceProvider::class,` <br />
 
 ## Конфигурация
 Выполняем команду <br />
- php artisan vendor:publish --provider=Zloykolobok\Megaplan\MegaplanServiceProvider
+`php artisan vendor:publish --provider=Zloykolobok\Megaplan\MegaplanServiceProvider` <br />
 Будет создан конфигурационный файл config/megaplan.php, где:
 * api - если false, то подключаемся через приложение мегаплана
 * host - указываем адрес
@@ -23,8 +23,28 @@ Zloykolobok\Megaplan\MegaplanServiceProvider::class,
 ## Документация по Мегаплану
 <https://dev.megaplan.ru/>
 
+## Пример использования
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Zloykolobok\Megaplan\Megaplan;
+
+class TestController extends Controller
+{
+    public function test()
+    {
+        $mega = new Megaplan;
+
+        dd($mega->getSchemes());
+    }
+}
+```
+
 ## Автор
-[Блог автора](https://web-programming.com.ua)
+[Блог автора](https://web-programming.com.ua) <br />
 [Задать вопрос](https://web-programming.com.ua/obratnaya-svyaz/)
 
 
