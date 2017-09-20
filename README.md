@@ -2,15 +2,15 @@
 Это пакет для подключения к АПИ [Мегаплан](https://megaplan.ru/)
 
 ## Установка
-С помощью composer
+С помощью composer <br />
 composer require zloykolobok/megaplan
 
 ## Подключение
-В app.php в секции Package Service Providers 
+В app.php в секции Package Service Providers <br />
 Zloykolobok\Megaplan\MegaplanServiceProvider::class,
 
 ## Конфигурация
-Выполняем команду
+Выполняем команду <br />
  php artisan vendor:publish --provider=Zloykolobok\Megaplan\MegaplanServiceProvider
 Будет создан конфигурационный файл config/megaplan.php, где:
 * api - если false, то подключаемся через приложение мегаплана
@@ -24,8 +24,8 @@ Zloykolobok\Megaplan\MegaplanServiceProvider::class,
 <https://dev.megaplan.ru/>
 
 ## Автор
-[Блог автора] <https://web-programming.com.ua>
-[Задать вопрос] <https://web-programming.com.ua/obratnaya-svyaz/>
+[Блог автора](https://web-programming.com.ua)
+[Задать вопрос](https://web-programming.com.ua/obratnaya-svyaz/)
 
 
 
