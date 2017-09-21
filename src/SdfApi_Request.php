@@ -1,9 +1,7 @@
 <?php
 namespace Zloykolobok\Megaplan;
 use DateTime;
-
-
-require __DIR__.'\SdfApi_RequestInfo.php';
+use Zloykolobok\Megaplan\SdfApi_RequestInfo;
 
 //{{{ SdfApi_Request
 /**
