@@ -3,7 +3,6 @@ namespace Zloykolobok\Megaplan;
 use DateTime;
 use Zloykolobok\Megaplan\SdfApi_RequestInfo;
 
-//{{{ SdfApi_Request
 /**
  * Библиотека для формирования запроса к API Мегаплана
  * Полное описание API Мегаплана: http://wiki.megaplan.ru/API

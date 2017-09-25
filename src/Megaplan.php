@@ -353,4 +353,115 @@ class Megaplan
         return $raw;
     }
 
+    /**
+    *
+    * ----------------- Комментарии -----------------
+    *
+    */
+
+    /**
+    * Список всех комментариев по актуальным задачам и проектам
+    *
+    *@param bool $onlyActual - Если true, то будут выводиться комментарии только незавершенных задач или проектов
+    *@param string $timeUpdated - Дата/время в одном из форматов ISO 8601, Возвращать только те объекты, которые были изменены после указанный даты
+    *@param bool $droppedOnly - Если true, то будут выводиться удаленные комментарии задач или проектов
+    *
+    *@return mixed|string
+    */
+    public function commentAll($onlyActual = true, $timeUpdated = null, $droppedOnly = false)
+    {
+        $this->params = [];
+        $this->params['OnlyActula'] = $onlyActual;
+        $this->params['TimeUpdated'] = $timeUpdated;
+        $this->params['DroppedOnly'] = $droppedOnly;
+
+        $raw = $this->req->get('/BumsCommonApiV01/Comment/all.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
+
+    /**
+    * Загрузка одного комментария по идентификатору
+    *
+    * @param int $id - ID комментария
+    *
+    * @return mixed|string
+    */
+    public function commentById($id)
+    {
+        $this->params = [];
+        $this->params['Id'] = $id;
+
+        $raw = $this->req->get('/BumsCommonApiV01/Comment/commentById.api',$this->params);
+        $raw = json_decode($raw);
+
+        return dd($raw);
+    }
+
+    /**
+     * Создание комментария
+     *
+     * @param $subjectType - приниает task (задача), project (проект), contractor (клиент), deal (сделка), discuss (обсуждение)
+     * @param $id - ID комментируемого объекта
+     * @param $text - Текст комментария
+     * @param $work - Кол-во потраченных минут, которое приплюсуется к комментируемому объекту (задача или проект)
+     * @return mixed|string
+     */
+     public function commentCreate($subjectType = 'deal',$id,$text,$work=null)
+     {
+         $this->params = [];
+         $this->params['SubjectType'] = $subjectType;
+         $this->params['SubjectId'] = $id;
+         $this->params['Model[Text]'] = $text;
+         $this->params['Model[Work]'] = $work;
+ 
+         $raw = $this->req->get('/BumsCommonApiV01/Comment/create.api',$this->params);
+         $raw = json_decode($raw);
+ 
+         return $raw;
+     }
+
+    /**
+    *Список комментариев по задаче/проекту
+    *@param string $subjectType - task (задача), project (проект), contractor (клиент), deal (сделка) Тип комментируемого объекта
+    *@param int $subjectId - ID комментируемого объекта
+    *@param string $timeUpdated - Дата/время в одном из форматов ISO 8601, Возвращать только те объекты, которые были изменены после указанный даты
+    *@param string $order - asc (по возрастанию), desc (по убыванию), Направление сортировки по дате (по умолчанию asc)
+    *@param bool $textHtml - Возвращать ли комментарий в Html формате (по умолчанию false)
+    *@param bool $unreadOnly - Возвращает только непрочитанные комментарии если true, по умолчанию false
+    *@param int $limit - Сколько выбрать комментариев (LIMIT)
+    *@param int $offset - Начиная с какого выбирать комментарии (OFFSET)
+    *@param bool $droppedOnly - Возвращать только удаленные комментарии
+    */
+    public function commentList(
+        $subjectType = 'task',
+        $subjectId,
+        $timeUpdated = null, 
+        $order = 'asc',
+        $textHtml = false,
+        $unreadOnly = false,
+        $limit = null,
+        $offset = null,
+        $droppedOnly = false)
+    {
+        $this->params = [];
+        $this->params['SubjectType'] = $subjectType;
+        $this->params['SubjectId'] = $subjectId;
+        $this->params['TimeUpdated'] = $timeUpdated;
+        $this->params['Order'] = $order;
+        $this->params['TextHtml'] = $textHtml;
+        $this->params['UnreadOnly'] = $unreadOnly;
+        $this->params['Limit'] = $limit;
+        $this->params['Offset'] = $offset;
+        $this->params['DroppedOnly'] = $droppedOnly;
+
+        $raw = $this->req->get('/BumsCommonApiV01/Comment/list.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
+
+    
+
 }
