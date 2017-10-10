@@ -63,7 +63,7 @@ class Megaplan
      */
 
     /**
-     * Получаем список схем
+     * Получаем список сделок
      *
      * @param null $limit
      * @param null $offset
@@ -577,6 +577,214 @@ class Megaplan
         return $raw;
     }
 
-    
+    /**
+    *-------------- ЗАДАЧИ ------------
+    */
 
+    /**
+    * Список задач
+    *
+    *@param string $folder - Допустимые значения: 'incoming' - входящие, 'responsible' - ответственный,
+    *                        'executor' - соисполнитель, 'owner' - исходящие, 'auditor' - аудируемые,
+    *                        'my' - участник, 'all' - все. По умолчанию: all
+    *@param string $timeUpdated - Возвращать только те объекты, которые были изменены после указанный даты. Дата/время в одном из форматов ISO 8601
+    *@param string $status - Допустимые значения: 'actual' - актуальные, 'inprocess' - в процессе,
+    *                        'new' - новые, 'overdue' - просроченные, 'done' - условно завершенные,
+    *                        'delayed' - отложенные, 'completed' - завершенные, 'failed' - проваленные,
+    *                        'any' - любые. По умолчанию: any
+    *@param integer $favoritesOnly - Только избранное. Допустимые значения: 0, 1. По умолчанию: 0
+    *@param string $search - Строка поиска показывать в списке задач все поля из карточки задачи/.
+    *                        Допустимые значения: true, false По умолчанию: false
+    *@param bool $onlyActual - Если true, то будут выводиться только незавершенные задачи
+    *@param string $filterId - Код фильтра. Допустимые значения: любая строка (может быть как числом, так и строковым идентификатором)
+    *@param bool $count - Если передан этот параметр со значением true, то вместо списка будет выводиться 
+    *                     только количество задач, удовлетворяющих условиям. По умолчанию: false
+    *@param integer $employeeId - Код сотрудника, для которого нужно загрузить задачи
+    *@param integer $projectId - Возвращает только задачи, входящие в проект ProjectId
+    *@param integer $superTaskId - Возвращает только задачи, входящие в надзадачу SuperTaskId
+    *@param string $sortBy - Сортировка результата. Допустимые значения: 'id' - идентификатор,
+    *                        'name' - наименование, 'activity' - активность, 'deadline' - дата дедлайна,
+    *                        'responsible' - ответственный, 'owner' - постановщик, 'contractor' - заказчик,
+    *                        'start' - старт, 'plannedFinish' - плановый финиш, 'plannedWork' - запланировано,
+    *                        'actualWork' - отработано, 'completed' - процент завершения, 'bonus' - бонус,
+    *                        'fine' - штраф, 'plannedTime' - длительность
+    *@param string $sortOrder - Направление сортировки. Допустимые значения: 'asc' - по возрастанию,
+    *                           'desc' - по убыванию. По умолчанию: asc
+    *@param bool $showActions - Нужно ли показывать в списке возможные действия над задачей. По умолчанию: false
+    *@param integer $limit - Сколько выбрать задач (LIMIT), Целочисленное значение в диапазоне [1,100] По умолчанию: 50
+    *@param integer $offset - 
+    */
+
+    public function taskList(
+        $folder = 'all',
+        $timeUpdated = null,
+        $status = 'any',
+        $favoritesOnly = 0,
+        $search = false,
+        $onlyActual = false,
+        $filterId = null,
+        $count = false,
+        $employeeId = null,
+        $projectId = null,
+        $superTaskId = null,
+        $sortBy = null,
+        $sortOrder = 'asc',
+        $showActions = false,
+        $limit = 50,
+        $offset = null
+    ){
+        $this->params['Folder'] = $folder;
+        $this->params['TimeUpdated'] = $timeUpdated;
+        $this->params['Status'] = $status;
+        $this->params['FavoritesOnly'] = $favoritesOnly;
+        $this->params['Search'] = $search;
+        $this->param['OnlyActual'] = $onlyActual;
+        $this->params['FilterId'] = $filterId;
+        $this->params['Count'] = $count;
+        $this->params['EmployeeId'] = $employeeId;
+        $this->params['ProjectId'] = $projectId;
+        $this->params['SuperTaskId'] = $superTaskId;
+        $this->params['SortBy'] = $sortBy;
+        $this->params['SortOrder'] = $sortOrder;
+        $this->params['ShowActions'] = $showActions;
+        $this->params['Limit'] = $limit;
+        $this->params['Offset'] = $offset;
+
+        $raw = $this->req->get('/BumsTaskApiV01/Task/list.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
+
+    /**
+    * Создание задачи
+    *
+    *@param string $name - Название. Обязательное поле
+    *@param datetime $deadline - Дедлайн (дата со временем)
+    *@param date $deadlineDate - Дедлайн (только дата)
+    *@param string $deadlineType - Тип дедлайна
+    *@param integer $responsible - Код ответственного. Обязательное поле для не массовой задачи
+    *@param integer[] $executors - Коды соисполнителей 	Обязательное поле для массовой задачи
+    *@param integer[] $auditors - Коды аудиторов
+    *@param integer $severity - Код важности
+    *@param string $superTask - Код надзадачи (если число) или код проекта (если строка в формате ‘pКод_проекта‘)
+    *@param integer $customer - Код заказчика
+    *@param integer $isGroup - Массовая задача (каждому соисполнителю будет создана своя задача). Допустимые значения: 0 или 1
+    *@param string $statement - Суть задачи
+    *@param array $files - Массив приложенных файлов. Должен передаваться POST-запросом
+    *@param datetime $start - Планирование: старт.Дата со временем
+    *@param date $plannedFinish - Планирование: финиш. Только дата. При указанном Model[PlannedTime] расчитывается автоматически
+    *@param integer $plannedTime - Планирование: длительность (в днях). При указанном Model[PlannedFinish] расчитывается автоматически
+    *@param integer $plannedWork - Планирование: плановые трудозатраты (в минутах)
+    */
+    public function taskCreate(
+        $name,
+        $deadline = null,
+        $deadlineDate = null,
+        $deadlineType = null,
+        $responsible = null,
+        $executors = null,
+        $auditors = null,
+        $severity = null,
+        $superTask = null,
+        $customer = null,
+        $isGroup = 0,
+        $statement = null,
+        $files = null,
+        $start = null,
+        $plannedFinish = null,
+        $plannedTime = null,
+        $plannedWork = null
+    )
+    {
+        $this->params = [];
+        $this->params['Model[Name]'] = $name; 
+        $this->params['Model[Deadline]'] = $deadline;
+        $this->params['Model[DeadlineDate]'] = $deadlineDate;
+        $this->params['Model[DeadlineType]'] = $deadlineType;
+        $this->params['Model[Responsible]'] = $responsible;
+        $this->params['Model[Executors]'] = $executors;
+        $this->params['Model[Auditors]'] = $auditors;
+        $this->params['Model[Severity]'] = $severity;
+        $this->params['Model[SuperTask]'] = $superTask;
+        $this->params['Model[Customer]'] = $customer;
+        $this->params['Model[IsGroup]'] = $isGroup;
+        $this->params['Model[Statement]'] = $statement;
+        $this->params['Model[Attaches][Add]'] = $files;
+        $this->params['Model[Start]'] = $start;
+        $this->params['Model[PlannedFinish]'] = $plannedFinish;
+        $this->params['Model[PlannedTime]'] = $plannedTime;
+        $this->params['Model[PlannedWork]'] = $plannedWork;
+
+        $raw = $this->req->get('/BumsTaskApiV01/Task/create.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
+
+    /**
+    * Редактирование задачи
+    *
+    *@param integer $id - ID задачи обязательный параметр.
+    *@param string $name - Название
+    *@param datetime $deadline - Дедлайн (дата со временем)
+    *@param date $deadlineDate - Дедлайн (только дата)
+    *@param string $deadlineType - Тип дедлайна
+    *@param integer $owner - Код постановщика
+    *@param integer $responsible - Код ответственного
+    *@param integer[] $executors - Коды соисполнителей
+    *@param integer[] $auditors - Коды аудиторов
+    *@param integer $severity - Код важности
+    *@param string $superTask - Код надзадачи (если число) или код проекта (если строка в формате ‘pКод_проекта‘)
+    *@param integer $customer - Код заказчика
+    *@param string $statement - 
+    *@param array $files - Массив приложенных файлов 	Должен передаваться POST-запросом
+    *@param datetime $start - Планирование: старт 	Дата со временем
+    *@param date $plannedFinish - Планирование: финиш 	Только дата. При указанном Model[PlannedTime] расчитывается автоматически
+    *@param integer $plannedTime - Планирование: длительность (в днях) 	При указанном Model[PlannedFinish] расчитывается автоматически
+    */
+    public function taskEdit(
+        $id,
+        $name = null,
+        $deadline = null,
+        $deadlineDate = null,
+        $deadlineType = null,
+        $owner = null,
+        $responsible = null,
+        $executors = null,
+        $auditors = null,
+        $severity = null,
+        $superTask = null,
+        $customer = null,
+        $statement = null,
+        $files = null,
+        $start = null,
+        $plannedFinish = null,
+        $plannedTime = null
+    ){
+        $this->params = [];
+        $this->params['Id'] = $id;
+        $this->params['Model[Name]'] = $name;
+        $this->param['Model[Deadline]'] = $deadline;
+        $this->params['Model[DeadlineDate]'] = $deadlineDate;
+        $this->params['Model[DeadlineType]'] = $deadlineType;
+        $this->params['Model[Owner]'] = $owner;
+        $this->param['Model[Responsible]'] = $responsible;
+        $this->param['Model[Executors]'] = $executors;
+        $this->params['Model[Auditors]'] = $auditors;
+        $this->params['Model[Severity]'] = $severity;
+        $this->params['Model[SuperTask]'] = $superTask;
+        $this->params['Model[Customer]'] = $customer;
+        $this->params['Model[Statement]'] = $statement;
+        $this->params['Model[Attaches][Add]'] = $files;
+        $this->params['Model[Start]'] = $start;
+        $this->params['Model[PlannedFinish]'] = $plannedFinish;
+        $this->params['Model[PlannedTime]'] = $plannedTime;
+
+        $raw = $this->req->get('/BumsTaskApiV01/Task/edit.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
 }
+
