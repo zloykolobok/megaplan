@@ -786,5 +786,23 @@ class Megaplan
 
         return $raw;
     }
+
+     /**
+     * --------- Глобальный поиск -----------
+     */
+
+    /**
+     * Глобальный поиск
+     */
+    public function searchQuick($qs)
+    {
+        $this->params = [];
+        $this->params['qs'] = $qs;
+
+        $raw = $this->req->get('/BumsCommonApiV01/Search/quick.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
 }
 
