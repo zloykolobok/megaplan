@@ -326,6 +326,21 @@ class Megaplan
     }
 
     /**
+     * Карточка сотрудника
+     * @param $id - ID сотрудника
+     */
+    public function employeeCard($id)
+    {
+        $this->params = [];
+        $this->params['Id'] = $id;
+
+        $raw = $this->req->get('/BumsStaffApiV01/Employee/card.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
+
+    /**
      * *************  КЛИЕНТЫ  *************
      */
 
