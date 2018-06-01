@@ -19,6 +19,7 @@
 * password - указываем пароль, если подключаемся чере API
 * accessId - указываем UUID приложения, если подключаемся через приложение
 * secretKey - указываем токен приложения, если подключаемся через приложение
+* https - по умолчанию true, через какой протокол работать
 
 ## Документация по Мегаплану
 <https://dev.megaplan.ru/>
@@ -46,6 +47,3 @@ class TestController extends Controller
 ## Автор
 [Блог автора](https://web-programming.com.ua) <br />
 [Задать вопрос](https://web-programming.com.ua/obratnaya-svyaz/)
-
-
-
