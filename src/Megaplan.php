@@ -19,6 +19,7 @@ class Megaplan
     protected $password = null;
     protected $accessId = null;
     protected $secretKey = null;
+    protected $https = true;
 
 
     public function __construct()
@@ -29,11 +30,12 @@ class Megaplan
         $this->password = config('megaplan.password');
         $this->accessId = config('megaplan.accessId');
         $this->secretKey = config('megaplan.secretKey');
+        $this->https = config('megaplan.https');
 
         if($this->api) {
             // Авторизуемся в Мегаплане
-            $this->req = new SdfApi_Request( '', '', $this->host, true );
-        
+            $this->req = new SdfApi_Request( '', '', $this->host, $this->https );
+
             $response = json_decode(
                 $this->req->get(
                     '/BumsCommonApiV01/User/authorize.api',
@@ -51,11 +53,11 @@ class Megaplan
             } else {
                 dd('Error: '. $response->status->message);
             }
-        
-            
+
+
         }
-        
-        $this->req = new SdfApi_Request( $this->accessId, $this->secretKey, $this->host, true );
+
+        $this->req = new SdfApi_Request( $this->accessId, $this->secretKey, $this->host, $this->https );
     }
 
     /**
@@ -89,7 +91,7 @@ class Megaplan
     /**
      * Получаем список сделок
      *
-     * 
+     *
      * @param null $limit
      * @param null $offset
      * @return mixed|string
@@ -101,21 +103,21 @@ class Megaplan
          if(!is_null($limit)){
              $this->params['Limit'] = $limit;
          };
- 
+
          if(!is_null($offset)){
              $this->params['Offset'] = $offset;
          };
- 
+
          $raw = $this->req->get('/BumsTradeApiV01/Deal/list.api',$this->params);
          $raw = json_decode($raw);
- 
+
          return $raw;
      }
 
       /**
      * Получаем карточку сделки
      *
-     * 
+     *
      * @param null $limit
      * @param null $offset
      * @return mixed|string
@@ -126,10 +128,10 @@ class Megaplan
          $this->params['Id'] = $id;
         //  $this->params['RequestedFields'] = $fields;
         //  $this->params['ExtraFields'] = $extraFields;
- 
+
          $raw = $this->req->get('/BumsTradeApiV01/Deal/card.api',$this->params);
          $raw = json_decode($raw);
- 
+
          return $raw;
      }
 
@@ -225,7 +227,7 @@ class Megaplan
     /**
      * Редактирование сделки
      *
-     * @param $id 
+     * @param $id
      * @param null $statusId
      * @param bool|true $stricLogic
      * @param null $managerId
@@ -279,7 +281,7 @@ class Megaplan
         $this->params['Model[Contractor]'] = $contractorId;
         $this->params['Model[Contact]'] = $contactId;
         $this->params['Model[Description]'] = $description;
-        $this->params['Model[Category1000073CustomFieldZapisRazgovora][Add]'] = $files;        
+        $this->params['Model[Category1000073CustomFieldZapisRazgovora][Add]'] = $files;
 
         $raw = $this->req->post('/BumsTradeApiV01/Deal/save.api',$this->params);
         $raw = json_decode($raw);
@@ -545,10 +547,10 @@ class Megaplan
          $this->params['SubjectId'] = $id;
          $this->params['Model[Text]'] = $text;
          $this->params['Model[Work]'] = $work;
- 
+
          $raw = $this->req->get('/BumsCommonApiV01/Comment/create.api',$this->params);
          $raw = json_decode($raw);
- 
+
          return $raw;
      }
 
@@ -567,7 +569,7 @@ class Megaplan
     public function commentList(
         $subjectType = 'task',
         $subjectId,
-        $timeUpdated = null, 
+        $timeUpdated = null,
         $order = 'asc',
         $textHtml = false,
         $unreadOnly = false,
@@ -612,7 +614,7 @@ class Megaplan
     *                        Допустимые значения: true, false По умолчанию: false
     *@param bool $onlyActual - Если true, то будут выводиться только незавершенные задачи
     *@param string $filterId - Код фильтра. Допустимые значения: любая строка (может быть как числом, так и строковым идентификатором)
-    *@param bool $count - Если передан этот параметр со значением true, то вместо списка будет выводиться 
+    *@param bool $count - Если передан этот параметр со значением true, то вместо списка будет выводиться
     *                     только количество задач, удовлетворяющих условиям. По умолчанию: false
     *@param integer $employeeId - Код сотрудника, для которого нужно загрузить задачи
     *@param integer $projectId - Возвращает только задачи, входящие в проект ProjectId
@@ -627,7 +629,7 @@ class Megaplan
     *                           'desc' - по убыванию. По умолчанию: asc
     *@param bool $showActions - Нужно ли показывать в списке возможные действия над задачей. По умолчанию: false
     *@param integer $limit - Сколько выбрать задач (LIMIT), Целочисленное значение в диапазоне [1,100] По умолчанию: 50
-    *@param integer $offset - 
+    *@param integer $offset -
     */
 
     public function taskList(
@@ -713,7 +715,7 @@ class Megaplan
     )
     {
         $this->params = [];
-        $this->params['Model[Name]'] = $name; 
+        $this->params['Model[Name]'] = $name;
         $this->params['Model[Deadline]'] = $deadline;
         $this->params['Model[DeadlineDate]'] = $deadlineDate;
         $this->params['Model[DeadlineType]'] = $deadlineType;
@@ -752,7 +754,7 @@ class Megaplan
     *@param integer $severity - Код важности
     *@param string $superTask - Код надзадачи (если число) или код проекта (если строка в формате ‘pКод_проекта‘)
     *@param integer $customer - Код заказчика
-    *@param string $statement - 
+    *@param string $statement -
     *@param array $files - Массив приложенных файлов 	Должен передаваться POST-запросом
     *@param datetime $start - Планирование: старт 	Дата со временем
     *@param date $plannedFinish - Планирование: финиш 	Только дата. При указанном Model[PlannedTime] расчитывается автоматически
@@ -820,4 +822,3 @@ class Megaplan
         return $raw;
     }
 }
-

@@ -7,4 +7,5 @@
         'password' => '',
         'accessId' => 'UUID',
         'secretKey' => 'secret',
+        'https' =>true,
     ];
