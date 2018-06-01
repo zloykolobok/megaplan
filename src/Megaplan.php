@@ -65,7 +65,7 @@ class Megaplan
      */
 
     /**
-     * Получаем список сделок
+     * Получаем список схем сделок
      *
      * @param null $limit
      * @param null $offset
@@ -91,14 +91,16 @@ class Megaplan
     /**
      * Получаем список сделок
      *
-     *
+     * @param null $filetrId - integer	Идентификатор фильтра
+     * @param null $filters - array Массив параметров для фильтрации в формате поле => значение
      * @param null $limit
      * @param null $offset
      * @return mixed|string
      */
-     public function getDeals($filters = null, $limit = null, $offset = null)
+     public function getDeals($filterId = null, $filters = null, $limit = null, $offset = null)
      {
          $this->params = [];
+         $this->params['FilterId'] = $filterId;
          $this->params['FilterFields'] = $filters;
          if(!is_null($limit)){
              $this->params['Limit'] = $limit;
@@ -114,10 +116,12 @@ class Megaplan
          return $raw;
      }
 
-      /**
+    /**
      * Получаем карточку сделки
      *
-     *
+     * @param $id - integer ID сделки
+     * @param $fields - array Запрашиваемые поля ( меняет набор полей по умолчанию )
+     * @param $extraFields - array Дополнительные поля ( дополняют набор полей по умолчанию )
      * @param null $limit
      * @param null $offset
      * @return mixed|string
@@ -126,8 +130,8 @@ class Megaplan
      {
          $this->params = [];
          $this->params['Id'] = $id;
-        //  $this->params['RequestedFields'] = $fields;
-        //  $this->params['ExtraFields'] = $extraFields;
+         $this->params['RequestedFields'] = $fields;
+         $this->params['ExtraFields'] = $extraFields;
 
          $raw = $this->req->get('/BumsTradeApiV01/Deal/card.api',$this->params);
          $raw = json_decode($raw);
@@ -137,13 +141,14 @@ class Megaplan
 
     /**
      * Получаем список полей для сделки
-     * @param $id - ID сделки
+     * @param $id - integer ID сделки
      * @return mixed|string
      */
     public function getSchemeFields($id)
     {
         $this->params = [];
         $this->params['ProgramId'] = $id;
+
         $raw = $this->req->get('/BumsTradeApiV01/Deal/listFields.api',$this->params);
         $raw = json_decode($raw);
 
@@ -153,15 +158,20 @@ class Megaplan
     /**
      * Добавление сделки
      *
-     * @param $programId
-     * @param null $statusId
-     * @param bool|true $stricLogic
-     * @param null $managerId
-     * @param $contractorId
-     * @param $contactId
-     * @param $description
-     * @param $type
-     * @param array|null $files
+     * @param $programId - integer ID схемы сделки
+     * @param null $statusId - integer ID статуса сделки
+     * @param bool|true $stricLogic - boolean Строгая логика перехода из статуса в статус. По умолчанию: true.
+     * @param null $managerId - integer Идентификатор пользователя, являющегося менеджером сделки
+     * @param $contractorId - integer Идентификатор клиента
+     * @param $contactId - integer Идентификатор контактного лица
+     * @param $auditors - string Идентификаторы пользователей являющихся аудиторами по сделке (перечисляем через запятую)
+     * @param $description - string Описание сделки
+     * @param $customs - array Дополнительное поле, созданное пользователем <название поля> => <значение>,
+     *      $array['Category1000067CustomFieldNomerZakupki'] = $deal->purchaseNumber;
+     *      $array['Category1000067CustomFieldSummaZakupki][Value'] = $deal->maxPrice;
+     *      $array['Category1000067CustomFieldSummaZakupki][Currency'] = 1;
+     * @param $positions - array Массив позиций сделок
+     *
      * @return mixed|string
      */
     public function addDeal(
@@ -169,54 +179,28 @@ class Megaplan
         $statusId = null,
         $stricLogic = true,
         $managerId = null,
-        $contractorId,
-        $contactId,
+        $contractorId = null,
+        $contactId = null,
+        $auditors = null,
         $description,
-        $type,
-        array $files = null,
-        $prioritet,
-        $number = null,
-        $statusClienta
+        $customs,
+        $positions
     )
     {
         $this->params = [];
-//        Category1000047CustomFieldTipZayavki
-//        Category1000047CustomFieldFayli
 
-        // ProgramId
-        // StatusId = null
-        // StrictLogic = true
-        // Model[Manager]
-        // Model[Contractor]
-        // Model[Contact]
-        // Model[Auditors] = null
-        // Model[Description]
-        // Model[Paid][...]
-        // Model[Paid][Value]
-        // Model[Paid][Rate]
-        // Model[Paid][Currency]
-        // Model[Cost][...]
-        // Model[Cost][Value]
-        // Model[Cost][Rate]
-        // Model[Cost][Rate]
-        // Model[Имя_поля][Add]
-        // Model[Имя_поля][Add][0...n][Content]
-        // Model[Имя_поля][Add][0...n][Name]
-        // Model[Имя_поля][Delete][0...n]
-        // Model[Имя_поля]
-        // Positions
         $this->params['ProgramId'] = $programId;
         $this->params['StatusId'] = $statusId;
         $this->params['StrictLogic'] = $stricLogic;
         $this->params['Model[Manager]'] = $managerId;
         $this->params['Model[Contractor]'] = $contractorId;
         $this->params['Model[Contact]'] = $contactId;
+        $this->params['Model[Auditors]'] = $auditors;
         $this->params['Model[Description]'] = $description;
-        $this->params['Model[Category1000047CustomFieldTipZayavki]'] = $type;
-        $this->params['Model[Category1000047CustomFieldFayli][Add]'] = $files;
-        $this->params['Model[Category1000047CustomFieldPrioritet]'] = $prioritet;
-        $this->params['Model[Category1000047CustomFieldNomerZayavki]'] = $number;
-        $this->params['Model[Category1000047CustomFieldStatusKlienta]'] = $statusClienta;
+        foreach ($customs as $key => $value) {
+            $this->params['Model['.$key.']'] = $value;
+        }
+        $this->params['Positions'] = $positions;
 
         $raw = $this->req->post('/BumsTradeApiV01/Deal/save.api',$this->params);
         $raw = json_decode($raw);
@@ -227,15 +211,20 @@ class Megaplan
     /**
      * Редактирование сделки
      *
-     * @param $id
-     * @param null $statusId
-     * @param bool|true $stricLogic
-     * @param null $managerId
-     * @param $contractorId
-     * @param $contactId
-     * @param $description
-     * @param $type
-     * @param array|null $files
+     * @param $id - integer ID сделки
+     * @param null $statusId - integer ID статуса сделки
+     * @param bool|true $stricLogic - boolean Строгая логика перехода из статуса в статус. По умолчанию: true.
+     * @param null $managerId - integer Идентификатор пользователя, являющегося менеджером сделки
+     * @param $contractorId - integer Идентификатор клиента
+     * @param $contactId - integer Идентификатор контактного лица
+     * @param $auditors - string Идентификаторы пользователей являющихся аудиторами по сделке (перечисляем через запятую)
+     * @param $description - string Описание сделки
+     * @param $customs - array Дополнительное поле, созданное пользователем <название поля> => <значение>,
+     *      $array['Category1000067CustomFieldNomerZakupki'] = $deal->purchaseNumber;
+     *      $array['Category1000067CustomFieldSummaZakupki][Value'] = $deal->maxPrice;
+     *      $array['Category1000067CustomFieldSummaZakupki][Currency'] = 1;
+     * @param $positions - array Массив позиций сделок
+     *
      * @return mixed|string
      */
      public function editDeal(
@@ -243,45 +232,28 @@ class Megaplan
         $statusId = null,
         $stricLogic = true,
         $managerId = null,
-        $contractorId,
-        $contactId,
+        $contractorId = null,
+        $contactId = null,
+        $auditors = null,
         $description,
-        array $files = null
+        $customs,
+        $positions
     )
     {
         $this->params = [];
-//        Category1000047CustomFieldTipZayavki
-//        Category1000047CustomFieldFayli
 
-        // ProgramId
-        // StatusId = null
-        // StrictLogic = true
-        // Model[Manager]
-        // Model[Contractor]
-        // Model[Contact]
-        // Model[Auditors] = null
-        // Model[Description]
-        // Model[Paid][...]
-        // Model[Paid][Value]
-        // Model[Paid][Rate]
-        // Model[Paid][Currency]
-        // Model[Cost][...]
-        // Model[Cost][Value]
-        // Model[Cost][Rate]
-        // Model[Cost][Rate]
-        // Model[Имя_поля][Add]
-        // Model[Имя_поля][Add][0...n][Content]
-        // Model[Имя_поля][Add][0...n][Name]
-        // Model[Имя_поля][Delete][0...n]
-        // Model[Имя_поля]
-        // Positions
         $this->params['Id'] = $id;
         $this->params['StatusId'] = $statusId;
         $this->params['StrictLogic'] = $stricLogic;
+        $this->params['Model[Manager]'] = $managerId;
         $this->params['Model[Contractor]'] = $contractorId;
         $this->params['Model[Contact]'] = $contactId;
+        $this->params['Model[Auditors]'] = $auditors;
         $this->params['Model[Description]'] = $description;
-        $this->params['Model[Category1000073CustomFieldZapisRazgovora][Add]'] = $files;
+        foreach ($customs as $key => $value) {
+            $this->params['Model['.$key.']'] = $value;
+        }
+        $this->params['Positions'] = $positions;
 
         $raw = $this->req->post('/BumsTradeApiV01/Deal/save.api',$this->params);
         $raw = json_decode($raw);
