@@ -7,10 +7,10 @@
     {
         public function boot()
         {
-            $this->publishes([__DIR__ . '/../config/' => config_path() . "/"], 'config');
+            $this->publishes([__DIR__ . '/../config/megaplan.php' => config_path('megaplan.php')]);
         }
 
-        public function register() 
+        public function register()
         {
         }
 
