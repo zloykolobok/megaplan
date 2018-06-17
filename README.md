@@ -11,7 +11,8 @@
 
 ## Конфигурация
 Выполняем команду <br />
-`php artisan vendor:publish --provider=Zloykolobok\Megaplan\MegaplanServiceProvider` <br />
+`php artisan vendor:publish` <br />
+Затем вбрыть провайдера Zloykolobok\Megaplan\MegaplanServiceProvider
 Будет создан конфигурационный файл config/megaplan.php, где:
 * api - если false, то подключаемся через приложение мегаплана
 * host - указываем адрес
