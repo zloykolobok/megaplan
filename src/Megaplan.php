@@ -458,6 +458,69 @@ class Megaplan
     }
 
     /**
+     * Редактирование клиента
+     *
+     * @param $id - ID клиента
+     * @param $type - приниает human или company
+     * @param null $firstName - имя
+     * @param null $lastName - фамилия
+     * @param null $middleName - отчество
+     * @param null $companyName - название компании, если $type = company
+     * @param null $parentCompany - ID компании
+     * @param null $email -
+     * @param null $phones -
+     * @param null $birthday -
+     * @param null $responsibles
+     * @param null $attaches
+     * @param null $fields - доп поля array('название поля' => 'значение')
+     * @return mixed|string
+     */
+    public function editContractor(
+        $id,
+        $type,
+        $firstName = null,
+        $lastName = null,
+        $middleName = null,
+        $companyName = null,
+        $parentCompany = null,
+        $email = null,
+        $phones = null,
+        $site = null,
+        $birthday = null,
+        $responsibles = null,
+        $attaches = null,
+        array $fields = null,
+        $ignore = false
+    )
+    {
+        $this->params = [];
+        $this->params['Id'] = $id;
+        $this->params['Model[TypePerson]'] = $type;
+        $this->params['Model[FirstName]'] = $firstName;
+        $this->params['Model[LastName]'] = $lastName;
+        $this->params['Model[MiddleName]'] = $middleName;
+        $this->params['Model[CompanyName]'] = $companyName;
+        $this->params['Model[ParentCompany]'] = $parentCompany;
+        $this->params['Model[Email]'] = $email;
+        $this->params['Model[Phones]'] = $phones;
+        $this->params['Model[Site]'] = $site;
+        $this->params['Model[Birthday]'] = $birthday;
+        $this->params['Model[Responsibles]'] = $responsibles;
+        $this->params['Model[Attaches][Add]'] = $attaches;
+        if(!is_null($fields)){
+            foreach($fields as $key=>$val){
+                $this->params["Model[$key]"] = $val;
+            }
+        }
+        $this->params['IgnoreRequiredFields']=$ignore;
+
+        $raw = $this->req->get('/BumsCrmApiV01/Contractor/save.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
+
+    /**
     *
     * ----------------- Комментарии -----------------
     *
