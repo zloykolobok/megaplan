@@ -521,6 +521,22 @@ class Megaplan
     }
 
     /**
+     * Список типов клиентов
+     *
+     * @return void
+     */
+    public function contractorType()
+    {
+        $this->params = [];
+
+
+        $raw = $this->req->get('/BumsCrmApiV01/ContractorType/list.api',$this->params);
+        $raw = json_decode($raw);
+
+        return $raw;
+    }
+
+    /**
     *
     * ----------------- Комментарии -----------------
     *
